@@ -7,6 +7,24 @@ extension CDRegisteredDIDDAO: DIDStore {
         updateOrCreate(did.string, context: writeContext) { cdobj, _ in
             cdobj.parseFrom(did: did, keyPairIndex: keyPairIndex, alias: alias)
         }
+        .handleEvents(receiveOutput: { [readContext, writeContext] _ in
+            // POS-243 SDKPROBE (read-only, measurement only — no behavior change):
+            // immediately after the write completes, count CDRegisteredDID DIRECTLY on
+            // BOTH the write context (editContext) and the read context
+            // (mainContext/viewContext). Splits the same-coordinator defect:
+            //   editContext>0 & viewContext=0 => sibling-invisible (read never merges) -> merge fix
+            //   editContext=0                 => save not landing in-session          -> write-path fix
+            let entityName = CDRegisteredDID.entity().name ?? "CDRegisteredDID"
+            func count(_ ctx: NSManagedObjectContext) -> Int {
+                var n = -1
+                ctx.performAndWait {
+                    let req = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
+                    n = (try? ctx.count(for: req)) ?? -1
+                }
+                return n
+            }
+            NSLog("POS-243 SDKPROBE editContext=%d viewContext=%d", count(writeContext), count(readContext))
+        })
         .map { _ in () }
         .eraseToAnyPublisher()
     }
