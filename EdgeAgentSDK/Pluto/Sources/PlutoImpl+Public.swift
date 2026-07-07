@@ -1,33 +1,10 @@
 import Combine
-import CoreData
 import Domain
 import Foundation
 
 extension PlutoImpl: Pluto {
     public func storeDID(did: Domain.DID, privateKeys: [StorableKey], alias: String?) -> AnyPublisher<Void, Error> {
         privateKeyDIDDao.addDID(did: did, privateKeys: privateKeys, alias: alias)
-            .handleEvents(receiveOutput: { [registeredDIDDao, privateKeyDIDDao] _ in
-                // POS-243 measurement (read-only, no behavior change): this closure runs on
-                // the ACTUAL createDID store path (createNewPrismDID -> registerPrismDID ->
-                // storeDID -> privateKeyDIDDao.addDID). It proves the fork binary is live and
-                // splits entity-mismatch vs merge by counting the READ table (CDRegisteredDID,
-                // on BOTH contexts) and the WRITE table (CDDIDPrivateKey, editContext).
-                NSLog("POS-243 forked SDK storeDID RAN (fork live)")
-                let regName = CDRegisteredDID.entity().name ?? "CDRegisteredDID"
-                let pkName = CDDIDPrivateKey.entity().name ?? "CDDIDPrivateKey"
-                func count(_ ctx: NSManagedObjectContext, _ entity: String) -> Int {
-                    var n = -1
-                    ctx.performAndWait {
-                        n = (try? ctx.count(for: NSFetchRequest<NSFetchRequestResult>(entityName: entity))) ?? -1
-                    }
-                    return n
-                }
-                NSLog("POS-243 SDKPROBE CDRegisteredDID editContext=%d viewContext=%d | CDDIDPrivateKey editContext=%d",
-                      count(registeredDIDDao.writeContext, regName),
-                      count(registeredDIDDao.readContext, regName),
-                      count(privateKeyDIDDao.writeContext, pkName))
-            })
-            .eraseToAnyPublisher()
     }
 
     public func getAllDIDs() -> AnyPublisher<[(did: DID, privateKeys: [StorableKey], alias: String?)], Error> {
