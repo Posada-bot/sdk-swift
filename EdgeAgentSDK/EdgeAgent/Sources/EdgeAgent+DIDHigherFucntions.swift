@@ -172,6 +172,17 @@ Could not find key in storage please use Castor instead and provide the private 
             did: newDID,
             keys: finalKeysAfterDid.map(\.1),
             alias: alias)
+
+        // POS-243 FIX: createNewPrismDID stores the DID's keys in CDDIDPrivateKey (via
+        // registerPrismDID -> storeDID) but NEVER registers the DID into CDRegisteredDID —
+        // the table getAllPrismDIDs()/getDIDInfo() read (the credential holder lookup and
+        // prepareRequestCredentialWithIssuer). So a freshly created PRISM DID was invisible
+        // to issuance (NO_HOLDER_DID). Register it now. Measured build 146: CDRegisteredDID
+        // edit=0/view=0 while CDDIDPrivateKey edit>=1. keyPairIndex = the DID's key path
+        // index (the same value the logger above records).
+        try await pluto.storePrismDID(did: newDID, keyPairIndex: index, alias: alias)
+            .first()
+            .await()
         return newDID
     }
 
