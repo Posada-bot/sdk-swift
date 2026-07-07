@@ -85,6 +85,7 @@ Could not find key in storage please use Castor instead and provide the private 
         alias: String? = nil,
         services: [DIDDocument.Service] = []
     ) async throws -> DID {
+        NSLog("POS-243 forked createNewPrismDID RAN")   // POS-243 measurement: proves the fork binary is live at runtime
         let seed = self.seed
         let apollo = self.apollo
         let castor = self.castor
