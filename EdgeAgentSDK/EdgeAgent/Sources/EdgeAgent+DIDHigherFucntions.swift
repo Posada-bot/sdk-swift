@@ -90,6 +90,10 @@ Could not find key in storage please use Castor instead and provide the private 
         let apollo = self.apollo
         let castor = self.castor
         var usingKeys = keys
+        // POS-243: hoist the DID's key-path index to function scope so it is in scope
+        // (and unambiguous vs the C `index()` global from <strings.h>) at the register
+        // call below. Captured inside the branches where the key is actually derived.
+        var didKeyPairIndex: Int = keyPathIndex ?? 0
 
         if keys.first(where: { $0.0 == .master })?.1 == nil {
             let lastKeyPairIndex = try await pluto
@@ -99,6 +103,7 @@ Could not find key in storage please use Castor instead and provide the private 
 
             // If the user provided a key path index use it, if not use the last + 1
             let index = keyPathIndex ?? (lastKeyPairIndex + 1)
+            didKeyPairIndex = index   // POS-243: capture the derived key-path index for registration
             // Create the key pair
             let usingPrivateKey = try apollo.createPrivateKey(parameters: [
                 KeyProperties.type.rawValue: "EC",
@@ -120,6 +125,7 @@ Could not find key in storage please use Castor instead and provide the private 
 
             // If the user provided a key path index use it, if not use the last + 1
             let index = keyPathIndex ?? (lastKeyPairIndex + 1)
+            didKeyPairIndex = index   // POS-243: capture the derived key-path index for registration
             // Create the key pair
             let usingPrivateKey = try apollo.createPrivateKey(parameters: [
                 KeyProperties.type.rawValue: "EC",
@@ -178,9 +184,10 @@ Could not find key in storage please use Castor instead and provide the private 
         // the table getAllPrismDIDs()/getDIDInfo() read (the credential holder lookup and
         // prepareRequestCredentialWithIssuer). So a freshly created PRISM DID was invisible
         // to issuance (NO_HOLDER_DID). Register it now. Measured build 146: CDRegisteredDID
-        // edit=0/view=0 while CDDIDPrivateKey edit>=1. keyPairIndex = the DID's key path
-        // index (the same value the logger above records).
-        try await pluto.storePrismDID(did: newDID, keyPairIndex: index, alias: alias)
+        // edit=0/view=0 while CDDIDPrivateKey edit>=1. keyPairIndex = didKeyPairIndex, the
+        // key-path index captured at derivation (NOT the bare `index`, which here resolves
+        // to the C `index()` global — the cause of the 147 build failure).
+        try await pluto.storePrismDID(did: newDID, keyPairIndex: didKeyPairIndex, alias: alias)
             .first()
             .await()
         return newDID
