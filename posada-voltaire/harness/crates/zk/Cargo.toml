@@ -1,0 +1,22 @@
+[package]
+name = "voltaire-zk"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "voltaire_zk"
+path = "src/lib.rs"
+
+[dependencies]
+ark-bn254 = "0.4"
+ark-groth16 = "0.4"
+ark-relations = "0.4"
+ark-r1cs-std = "0.4"
+ark-crypto-primitives = { version = "0.4", features = ["r1cs", "sponge", "crh", "snark"] }
+ark-ff = "0.4"
+ark-ec = "0.4"
+ark-std = "0.4"
+ark-serialize = "0.4"
+ark-snark = "0.4"
+rand = "0.8"

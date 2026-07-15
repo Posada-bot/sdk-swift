@@ -1,0 +1,13 @@
+{
+  "action_id": "gov_action1shadowed_info_action_example",
+  "action_type": "InfoAction (yes/no/abstain)",
+  "provenance": "STAKE NUMBERS ARE A CONFIG INPUT, NOT LIVE DATA. Live fetch of gov.tools and adastat.net returned HTTP 403 inside the harness (agent proxy). Replace drep_* with a real concluded action's DRep tally (see gov.tools 'Governance Actions' -> a concluded action -> vote breakdown) to get a real comparison. The CIP-1694 tallying SEMANTICS applied below (Abstain excluded from active stake; non-voting registered stake counts as No for ordinary actions; Yes/(Yes+No) vs threshold) are real and confirmed from gov.tools docs.",
+  "drep_yes": 2100000000,
+  "drep_no": 300000000,
+  "drep_abstain": 500000000,
+  "not_voted_registered": 1000000000,
+  "threshold": 0.67,
+  "non_voters_count_as_no": true,
+  "shadow_voters": 2000,
+  "shadow_distribution": [0.55, 0.30, 0.15]
+}
