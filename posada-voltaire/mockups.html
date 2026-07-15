@@ -1,0 +1,483 @@
+<title>Posada Voltaire — Sovereign Voting Protocol</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --ground:#F1EADB; --surface:#FBF7EE; --raise:#FFFFFF;
+    --ink:#151D3A; --ink-soft:#4B5473; --ink-faint:#7D8299;
+    --line:rgba(21,29,58,.14); --line-soft:rgba(21,29,58,.08);
+    --gilt:#9C7620; --gilt-bright:#C6A15B; --crimson:#8A1E2D; --jade:#1B7458; --indigo:#34478F;
+    --logo-filter:none;
+    --shadow:0 1px 2px rgba(21,29,58,.06),0 12px 34px -14px rgba(21,29,58,.28);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ground:#0A1128; --surface:#101a3b; --raise:#152150;
+      --ink:#ECE6D6; --ink-soft:#AAB2D2; --ink-faint:#7E88AE;
+      --line:rgba(236,230,214,.15); --line-soft:rgba(236,230,214,.08);
+      --gilt:#D9B978; --gilt-bright:#E7CC93; --crimson:#D97A82; --jade:#5FCBA6; --indigo:#8EA0E8;
+      --logo-filter:invert(1) brightness(1.06);
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 18px 44px -18px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="light"]{
+    --ground:#F1EADB; --surface:#FBF7EE; --raise:#FFFFFF;
+    --ink:#151D3A; --ink-soft:#4B5473; --ink-faint:#7D8299;
+    --line:rgba(21,29,58,.14); --line-soft:rgba(21,29,58,.08);
+    --gilt:#9C7620; --gilt-bright:#C6A15B; --crimson:#8A1E2D; --jade:#1B7458; --indigo:#34478F;
+    --logo-filter:none;
+    --shadow:0 1px 2px rgba(21,29,58,.06),0 12px 34px -14px rgba(21,29,58,.28);
+  }
+  :root[data-theme="dark"]{
+    --ground:#0A1128; --surface:#101a3b; --raise:#152150;
+    --ink:#ECE6D6; --ink-soft:#AAB2D2; --ink-faint:#7E88AE;
+    --line:rgba(236,230,214,.15); --line-soft:rgba(236,230,214,.08);
+    --gilt:#D9B978; --gilt-bright:#E7CC93; --crimson:#D97A82; --jade:#5FCBA6; --indigo:#8EA0E8;
+    --logo-filter:invert(1) brightness(1.06);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 18px 44px -18px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+    line-height:1.6;font-size:16px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  h1,h2,h3{font-family:var(--serif);font-weight:600;text-wrap:balance;line-height:1.1;margin:0}
+  a{color:inherit}
+  .eyebrow{font-family:var(--sans);font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--gilt);font-weight:700}
+  .mono{font-family:var(--mono)}
+
+  /* ---- masthead ---- */
+  header.mast{position:sticky;top:0;z-index:40;backdrop-filter:saturate(1.4) blur(10px);
+    background:color-mix(in srgb,var(--ground) 86%,transparent);border-bottom:1px solid var(--line)}
+  .mast .row{display:flex;align-items:center;gap:18px;justify-content:space-between;padding:14px 24px;max-width:1120px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:14px;min-width:0}
+  .brand img{height:34px;width:auto;filter:var(--logo-filter);flex:0 0 auto}
+  .brand .divider{width:1px;height:26px;background:var(--line)}
+  .brand .wm{font-family:var(--serif);font-size:19px;letter-spacing:.02em;white-space:nowrap}
+  .brand .wm b{font-weight:600}
+  .brand .wm .sub{display:block;font-family:var(--sans);font-size:10.5px;letter-spacing:.24em;
+    text-transform:uppercase;color:var(--ink-faint);margin-top:1px}
+  .mast a.mflink{font-size:13px;letter-spacing:.04em;color:var(--ink-soft);text-decoration:none;
+    border:1px solid var(--line);padding:8px 14px;border-radius:999px;white-space:nowrap;transition:.2s}
+  .mast a.mflink:hover{color:var(--ink);border-color:var(--gilt)}
+
+  /* ---- hero ---- */
+  .hero{position:relative;padding:78px 0 46px;overflow:hidden}
+  .hero canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.5;pointer-events:none}
+  .hero .inner{position:relative;z-index:2;max-width:1120px;margin:0 auto;padding:0 24px}
+  .hero h1{font-size:clamp(38px,7vw,76px);letter-spacing:-.015em}
+  .hero h1 .gilt{color:var(--gilt-bright);font-style:italic}
+  .hero .lede{max-width:60ch;color:var(--ink-soft);font-size:clamp(16px,2.1vw,20px);margin-top:22px}
+  .hero .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+  .chip{font-size:12.5px;letter-spacing:.03em;padding:7px 13px;border-radius:999px;border:1px solid var(--line);
+    background:var(--surface);color:var(--ink-soft);display:inline-flex;gap:7px;align-items:center}
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:var(--gilt-bright)}
+  .chip.j .dot{background:var(--jade)} .chip.c .dot{background:var(--crimson)} .chip.i .dot{background:var(--indigo)}
+  .pull{margin-top:40px;padding-left:20px;border-left:3px solid var(--gilt-bright);max-width:56ch}
+  .pull p{font-family:var(--serif);font-style:italic;font-size:clamp(19px,2.6vw,25px);color:var(--ink);margin:0;line-height:1.35}
+  .pull cite{display:block;font-style:normal;font-family:var(--sans);font-size:12px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--ink-faint);margin-top:12px}
+
+  /* ---- guarantee band ---- */
+  .band{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface)}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+  .stat{padding:26px 22px;border-left:1px solid var(--line-soft)}
+  .stat:first-child{border-left:0}
+  .stat .k{font-family:var(--serif);font-size:30px;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1}
+  .stat .k .u{font-size:15px;color:var(--gilt)}
+  .stat .l{font-size:12.5px;color:var(--ink-soft);margin-top:9px;letter-spacing:.01em}
+
+  section.blk{padding:66px 0}
+  .sechead{max-width:70ch}
+  .sechead h2{font-size:clamp(26px,4vw,40px);letter-spacing:-.01em}
+  .sechead p{color:var(--ink-soft);margin:14px 0 0;font-size:17px}
+  .kicker{margin-bottom:14px}
+
+  /* ---- journey / phones ---- */
+  .journey{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;margin-top:44px}
+  @media(max-width:980px){.journey{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.journey{grid-template-columns:1fr}}
+  .step .num{font-family:var(--mono);font-size:12px;color:var(--gilt);letter-spacing:.1em}
+  .step h3{font-size:18px;margin:6px 0 4px}
+  .step .g{font-size:13px;color:var(--ink-soft);min-height:52px}
+  .step .guar{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:11.5px;
+    color:var(--jade);font-weight:600;letter-spacing:.02em}
+  .step .guar svg{width:13px;height:13px}
+
+  .phone{margin-top:16px;border-radius:30px;background:#0C1330;border:1px solid rgba(255,255,255,.09);
+    box-shadow:var(--shadow);padding:12px 10px 14px;position:relative;aspect-ratio:9/18.6;overflow:hidden;
+    color:#ECE6D6;font-size:12.5px}
+  .phone:before{content:"";position:absolute;top:11px;left:50%;transform:translateX(-50%);
+    width:56px;height:5px;border-radius:99px;background:rgba(255,255,255,.16)}
+  .scr{position:absolute;inset:26px 12px 14px;display:flex;flex-direction:column;gap:9px}
+  .scr .top{display:flex;align-items:center;justify-content:space-between;color:#8790b8;font-size:10px;letter-spacing:.08em}
+  .scr .top .lv{display:flex;align-items:center;gap:5px}
+  .glyph{width:15px;height:15px;flex:0 0 auto}
+  .card{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:11px}
+  .card.sel{border-color:var(--gilt-bright);background:rgba(198,161,91,.14)}
+  .lab{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#8790b8}
+  .big{font-family:var(--serif);font-size:19px;color:#F3EEE0;line-height:1.15}
+  .hx{font-family:var(--mono);font-size:10px;color:#7BE0BE;word-break:break-all;line-height:1.5}
+  .hx.gold{color:var(--gilt-bright)}
+  .btn{margin-top:auto;background:linear-gradient(180deg,#CDA968,#B98F45);color:#1a1405;text-align:center;
+    font-weight:700;padding:11px;border-radius:12px;font-size:13px;letter-spacing:.02em}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.22);color:#ECE6D6;font-weight:600}
+  .row2{display:flex;gap:8px}
+  .row2>*{flex:1}
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:4px 9px;border-radius:99px;
+    background:rgba(95,203,166,.16);color:#8DE9C6;font-weight:600;letter-spacing:.02em;align-self:flex-start}
+  .pill.lock{background:rgba(198,161,91,.18);color:var(--gilt-bright)}
+  .opt{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:10px;border:1px solid rgba(255,255,255,.08)}
+  .opt .rd{width:15px;height:15px;border-radius:50%;border:2px solid #6a75a3;flex:0 0 auto}
+  .opt.on{border-color:var(--gilt-bright);background:rgba(198,161,91,.13)}
+  .opt.on .rd{border-color:var(--gilt-bright);background:radial-gradient(circle,var(--gilt-bright) 42%,transparent 46%)}
+  .opt .nm{font-size:12px;color:#EDE7D8} .opt .pt{font-size:9.5px;color:#8790b8}
+  .search{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.06);border-radius:9px;padding:8px 10px;color:#8790b8;font-size:11px}
+  .tallyrow{display:flex;flex-direction:column;gap:3px}
+  .tallyrow .tl{display:flex;justify-content:space-between;font-size:11px;color:#DBD6C6}
+  .barbg{height:7px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden}
+  .bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gilt-bright),#B98F45)}
+
+  /* ---- architecture ---- */
+  .stack{display:flex;flex-direction:column;gap:14px;margin-top:40px}
+  .layer{display:grid;grid-template-columns:132px 1fr;gap:20px;align-items:center;
+    background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px;position:relative;overflow:hidden}
+  .layer .ly{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--gilt);text-transform:uppercase}
+  .layer h3{font-size:19px;margin-top:5px}
+  .layer .d{color:var(--ink-soft);font-size:14.5px}
+  .layer .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+  .tag{font-size:11px;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:var(--ink-soft);font-family:var(--mono)}
+  .layer .edge{position:absolute;left:0;top:0;bottom:0;width:4px}
+  .l0 .edge{background:var(--gilt-bright)} .l1 .edge{background:var(--crimson)}
+  .l2 .edge{background:var(--indigo)} .l3 .edge{background:var(--jade)}
+  .flowdot{display:flex;justify-content:center;color:var(--ink-faint)}
+
+  /* ---- locks ---- */
+  .locks{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:40px}
+  @media(max-width:720px){.locks{grid-template-columns:1fr}}
+  .lock{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:var(--shadow)}
+  .lock .seal{width:40px;height:40px;border-radius:50%;border:2px solid var(--gilt-bright);
+    display:flex;align-items:center;justify-content:center;color:var(--gilt-bright);margin-bottom:14px}
+  .lock h3{font-size:19px} .lock p{color:var(--ink-soft);font-size:14.5px;margin:8px 0 0}
+  .lock .tech{margin-top:12px;font-family:var(--mono);font-size:11.5px;color:var(--jade)}
+
+  /* ---- manifesto ---- */
+  .manifesto{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .manifesto .inner{max-width:760px;margin:0 auto;padding:72px 24px}
+  .manifesto p{font-family:var(--serif);font-size:clamp(17px,2.3vw,21px);line-height:1.62;color:var(--ink);margin:0 0 20px}
+  .manifesto p strong{color:var(--gilt);font-weight:600}
+  .manifesto .rest{text-align:center;font-size:clamp(20px,3vw,27px);font-style:italic;margin-top:30px}
+  .manifesto .sig{text-align:center;letter-spacing:.3em;font-size:13px;color:var(--ink-soft);margin-top:20px;font-family:var(--sans)}
+  .manifesto .lnk{text-align:center;margin-top:28px}
+  .manifesto .lnk a{color:var(--gilt);text-decoration:none;border-bottom:1px solid var(--gilt);font-size:14px;padding-bottom:2px}
+
+  footer{padding:48px 0 64px}
+  .foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px}
+  .foot img{height:40px;filter:var(--logo-filter)}
+  .foot .meta{font-size:12.5px;color:var(--ink-faint);text-align:right;line-height:1.7}
+  .foot .meta b{color:var(--ink-soft);font-weight:600}
+  .disc{max-width:1120px;margin:22px auto 0;padding:16px 24px 0;border-top:1px solid var(--line-soft);
+    font-size:11.5px;color:var(--ink-faint);line-height:1.6}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.hero canvas{display:none}}
+</style>
+
+<header class="mast">
+  <div class="row">
+    <div class="brand">
+      <img src="assets/posada-lovelace-logo-alpha.png" alt="Posada — Ada Lovelace">
+      <div class="divider"></div>
+      <div class="wm"><b>Voltaire</b><span class="sub">Sovereign Voting Protocol</span></div>
+    </div>
+    <a class="mflink" href="https://posada.io/lovelace/manifesto" target="_blank" rel="noopener">Read the manifesto →</a>
+  </div>
+</header>
+
+<section class="hero">
+  <canvas id="stream" aria-hidden="true"></canvas>
+  <div class="inner">
+    <div class="eyebrow kicker">Cardano · Midnight · Posada DID</div>
+    <h1>The ballot,<br>made <span class="gilt">unforgeable.</span></h1>
+    <p class="lede">A coercion‑resistant, end‑to‑end‑verifiable voting protocol. Identity is proven by the Posada DID stack, the ballot is kept private on Midnight, and the outcome is anchored to Cardano — where not even Posada can change it. One person. One vote. At the scale of a nation.</p>
+    <div class="chips">
+      <span class="chip"><span class="dot"></span>One person · one vote</span>
+      <span class="chip j"><span class="dot"></span>End‑to‑end verifiable</span>
+      <span class="chip c"><span class="dot"></span>Nobody reads your ballot</span>
+      <span class="chip i"><span class="dot"></span>500M+ voters</span>
+    </div>
+    <div class="pull">
+      <p>Cryptography replaces trust where trust is abused.</p>
+      <cite>Posada · Lovelace Manifesto</cite>
+    </div>
+  </div>
+</section>
+
+<div class="band">
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><div class="k">500M<span class="u">+</span></div><div class="l">Voters, via off‑chain capture anchored to Cardano L1</div></div>
+      <div class="stat"><div class="k">1<span class="u"> : 1</span></div><div class="l">Person to vote — enforced by cryptographic nullifiers</div></div>
+      <div class="stat"><div class="k">0</div><div class="l">Parties who can decrypt a single ballot (t‑of‑n threshold)</div></div>
+      <div class="stat"><div class="k">4</div><div class="l">Independent locks on the outcome — not encryption alone</div></div>
+    </div>
+  </div>
+</div>
+
+<section class="blk">
+  <div class="wrap">
+    <div class="sechead">
+      <div class="eyebrow kicker">The voter journey</div>
+      <h2>Five screens, five guarantees.</h2>
+      <p>Every screen the voter touches is designed around a single cryptographic promise. The interface stays calm and legible; the mathematics does the work underneath.</p>
+    </div>
+
+    <div class="journey">
+      <!-- 1. Identity -->
+      <div class="step">
+        <div class="num">01 · IDENTITY</div>
+        <h3>Prove you're one human</h3>
+        <div class="g">On‑device biometrics and a zero‑knowledge personhood proof. Your face never leaves the phone.</div>
+        <div class="guar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Sybil‑proof, not surveilled</div>
+        <div class="phone"><div class="scr">
+          <div class="top"><span>Posada&nbsp;ID</span><span class="lv">●●● Secure</span></div>
+          <div class="card" style="text-align:center;padding:16px 11px">
+            <svg class="glyph" style="width:34px;height:34px;margin:2px auto 8px;color:var(--gilt-bright,#C6A15B)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+            <div class="lab">On‑device liveness</div>
+            <div class="big" style="margin-top:4px">Verified human</div>
+          </div>
+          <div class="card">
+            <div class="lab">Proof of personhood</div>
+            <div class="hx gold">did:prism:9f2a…c71b</div>
+          </div>
+          <span class="pill lock">🔒 Biometrics stay on this device</span>
+          <div class="btn">Issue voter credential</div>
+        </div></div>
+      </div>
+
+      <!-- 2. Ballot -->
+      <div class="step">
+        <div class="num">02 · BALLOT</div>
+        <h3>Choose, in secret</h3>
+        <div class="g">Search a large slate. Your selection is sealed the instant you make it — even the app can't read it back.</div>
+        <div class="guar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Threshold‑encrypted choice</div>
+        <div class="phone"><div class="scr">
+          <div class="top"><span>General Election</span><span class="lv">🔒 Sealed</span></div>
+          <div class="search">⌕ Search 2,140 candidates</div>
+          <div class="opt on"><span class="rd"></span><span><div class="nm">A. Bhatt</div><div class="pt">List 14 · District‑wide</div></span></div>
+          <div class="opt"><span class="rd"></span><span><div class="nm">M. Okonkwo</div><div class="pt">List 3</div></span></div>
+          <div class="opt"><span class="rd"></span><span><div class="nm">L. Moreau</div><div class="pt">List 27</div></span></div>
+          <div class="opt"><span class="rd"></span><span><div class="nm">S. Haddad</div><div class="pt">List 8</div></span></div>
+          <span class="pill lock">⛓ Encrypted before it leaves the phone</span>
+          <div class="btn">Seal my ballot</div>
+        </div></div>
+      </div>
+
+      <!-- 3. Benaloh -->
+      <div class="step">
+        <div class="num">03 · VERIFY</div>
+        <h3>Cast — or challenge</h3>
+        <div class="g">Optionally audit the encryption: spoil this ballot to check the app sealed exactly what you chose, then cast a fresh one.</div>
+        <div class="guar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Cast‑as‑intended (Benaloh)</div>
+        <div class="phone"><div class="scr">
+          <div class="top"><span>Confirm</span><span class="lv">Step 3 / 4</span></div>
+          <div class="card">
+            <div class="lab">Sealed ballot digest</div>
+            <div class="hx">c1d9 2f77 a04e b8… 55af</div>
+          </div>
+          <div class="card">
+            <div class="lab">Encryption randomness</div>
+            <div class="hx gold">hidden until you challenge</div>
+          </div>
+          <div style="font-size:11px;color:#8790b8;line-height:1.5">Challenging spoils this ballot and proves the app is honest. Casting commits it, unread by anyone.</div>
+          <div class="row2">
+            <div class="btn ghost">Challenge</div>
+            <div class="btn">Cast</div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- 4. Recorded -->
+      <div class="step">
+        <div class="num">04 · RECEIPT</div>
+        <h3>Recorded, not readable</h3>
+        <div class="g">You get a tracking code — proof your ballot is on the public board. It never reveals how you voted.</div>
+        <div class="guar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Recorded‑as‑cast · receipt‑free</div>
+        <div class="phone"><div class="scr">
+          <div class="top"><span>Ballot accepted</span><span class="lv">✓</span></div>
+          <div class="card" style="text-align:center">
+            <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--jade,#5FCBA6);color:var(--jade,#5FCBA6);display:flex;align-items:center;justify-content:center;margin:4px auto 10px">
+              <svg style="width:22px;height:22px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></div>
+            <div class="lab">Your tracking code</div>
+            <div class="hx gold" style="font-size:13px;margin-top:5px">VOLT‑7QF2‑M9KD‑1A</div>
+          </div>
+          <div class="card">
+            <div class="lab">Nullifier (one per voter)</div>
+            <div class="hx">n:0x4e91…a2f0 · unspent → spent</div>
+          </div>
+          <div class="btn ghost">Find my ballot on the board</div>
+        </div></div>
+      </div>
+
+      <!-- 5. Tally -->
+      <div class="step">
+        <div class="num">05 · TALLY</div>
+        <h3>Anyone can re‑count</h3>
+        <div class="g">The public board shows the running result with a proof of correct decryption. Recompute it yourself.</div>
+        <div class="guar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Counted‑as‑recorded · universal</div>
+        <div class="phone"><div class="scr">
+          <div class="top"><span>Public Board</span><span class="lv">● live</span></div>
+          <div class="tallyrow"><div class="tl"><span>A. Bhatt</span><span>41.2%</span></div><div class="barbg"><div class="bar" style="width:41%"></div></div></div>
+          <div class="tallyrow"><div class="tl"><span>M. Okonkwo</span><span>33.8%</span></div><div class="barbg"><div class="bar" style="width:34%"></div></div></div>
+          <div class="tallyrow"><div class="tl"><span>L. Moreau</span><span>16.5%</span></div><div class="barbg"><div class="bar" style="width:16%"></div></div></div>
+          <div class="tallyrow"><div class="tl"><span>Others (2,137)</span><span>8.5%</span></div><div class="barbg"><div class="bar" style="width:9%"></div></div></div>
+          <div class="card" style="padding:9px">
+            <div class="lab">Decryption proof</div>
+            <div class="hx">STARK ✓ · anchored @ block 11,204,882</div>
+          </div>
+          <span class="pill">✓ 5‑of‑9 trustees · verified</span>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="blk" style="padding-top:0">
+  <div class="wrap">
+    <div class="sechead">
+      <div class="eyebrow kicker">Architecture</div>
+      <h2>Four layers, each doing one job well.</h2>
+      <p>Identity is separated from the ballot by construction, the ballot is separated from the count, and the count is separated from any single party. No layer can betray the one below it.</p>
+    </div>
+    <div class="stack">
+      <div class="layer l0"><span class="edge"></span>
+        <div class="ly">Layer 0<br>Identity</div>
+        <div><h3>Who is a unique human</h3>
+          <div class="d">Posada DID stack on the Hyperledger Identus / Atala PRISM EdgeAgent SDK. Gov‑ID + on‑device liveness → a zero‑knowledge personhood credential → one anonymous, unlinkable voter credential.</div>
+          <div class="tags"><span class="tag">did:prism</span><span class="tag">on‑device biometrics</span><span class="tag">ZK personhood</span><span class="tag">no central roll</span></div>
+        </div>
+      </div>
+      <div class="flowdot">↓&nbsp; proof: "a valid, unused voter credential"</div>
+      <div class="layer l1"><span class="edge"></span>
+        <div class="ly">Layer 1<br>Private ballot</div>
+        <div><h3>How you voted, hidden</h3>
+          <div class="d">Routed through Midnight (Cardano's ZK privacy chain). The public record is only a nullifier, a threshold‑encrypted choice, and a validity proof. Nobody — not even Posada — sees the choice.</div>
+          <div class="tags"><span class="tag">Midnight · Compact</span><span class="tag">nullifier = 1p1v</span><span class="tag">ElGamal (homomorphic)</span><span class="tag">Semaphore‑style</span></div>
+        </div>
+      </div>
+      <div class="flowdot">↓&nbsp; encrypted, homomorphically tallyable ballots</div>
+      <div class="layer l2"><span class="edge"></span>
+        <div class="ly">Layer 2<br>Scale</div>
+        <div><h3>500M ballots, one small proof</h3>
+          <div class="d">Regional Hydra heads capture ballots; recursive STARK proofs compress millions of validity checks into one succinct, post‑quantum‑safe proof and a Merkle commitment.</div>
+          <div class="tags"><span class="tag">Hydra heads</span><span class="tag">recursive STARK</span><span class="tag">Merkle roots</span></div>
+        </div>
+      </div>
+      <div class="flowdot">↓&nbsp; Merkle roots + aggregate validity proof</div>
+      <div class="layer l3"><span class="edge"></span>
+        <div class="ly">Layer 3<br>Anchor & tally</div>
+        <div><h3>The immutable outcome</h3>
+          <div class="d">Cardano L1 anchors the append‑only bulletin board. Trustees run a threshold decryption of the summed totals only, publishing a proof anyone can re‑verify. To change the result you must rewrite a public blockchain.</div>
+          <div class="tags"><span class="tag">Aiken validators</span><span class="tag">Plutus/Haskell core</span><span class="tag">t‑of‑n threshold</span><span class="tag">public re‑tally</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="blk" style="padding-top:0">
+  <div class="wrap">
+    <div class="sechead">
+      <div class="eyebrow kicker">Why the outcome can't change</div>
+      <h2>Encryption keeps a ballot secret. Four locks keep the result true.</h2>
+      <p>"Impossible to change the outcome" is not a slogan about strong encryption — encryption hides <em>votes</em>, it does not make <em>results</em> immutable. Integrity is earned by four independent, publicly checkable mechanisms.</p>
+    </div>
+    <div class="locks">
+      <div class="lock">
+        <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="width:20px;height:20px"><path d="M12 2 4 6v6c0 5 3.4 8 8 10 4.6-2 8-5 8-10V6z"/></svg></div>
+        <h3>Cast‑as‑intended</h3>
+        <p>A Benaloh challenge lets any voter spoil a test ballot and confirm the app encrypted exactly their choice — catching a compromised device without ever creating a receipt.</p>
+        <div class="tech">// spoil → reveal randomness → re‑encrypt fresh</div>
+      </div>
+      <div class="lock">
+        <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="width:20px;height:20px"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
+        <h3>Recorded‑as‑cast</h3>
+        <p>Every accepted ballot is published on an append‑only bulletin board whose Merkle roots are anchored to Cardano L1. Your tracking code proves your ballot is there, unaltered.</p>
+        <div class="tech">// tracking code → Merkle inclusion → L1 anchor</div>
+      </div>
+      <div class="lock">
+        <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="width:20px;height:20px"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
+        <h3>Counted‑as‑recorded</h3>
+        <p>Votes are summed under homomorphic encryption; only the totals are decrypted, with a proof. Anyone can recompute the result from the public ciphertexts — a wrong total can't carry a valid proof.</p>
+        <div class="tech">// homomorphic sum → threshold decrypt + proof</div>
+      </div>
+      <div class="lock">
+        <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="width:20px;height:20px"><path d="M12 2 3 6v5c0 5 4 8 9 11 5-3 9-6 9-11V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Cannot be rewritten</h3>
+        <p>Altering the result requires forging a STARK proof <em>and</em> rewriting Cardano history <em>and</em> defeating independent verifiers worldwide — simultaneously. Trust does not rest on Posada.</p>
+        <div class="tech">// integrity ≠ availability — both are defended</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="manifesto">
+  <div class="inner">
+    <div class="eyebrow kicker" style="text-align:center">Posada · Lovelace Manifesto</div>
+    <p style="margin-top:22px">We reject the idea that connection requires surveillance. Identity must belong to the individual, not the platform. Data must be <strong>controlled, not extracted</strong>. Choices must be voluntary, not engineered by opaque algorithms.</p>
+    <p>In a world of behavioral profiling, we choose consent. In a world of algorithmic manipulation, we choose transparency. In a world of digital feudalism, we choose <strong>sovereignty</strong>. We are not building another engine for engagement — we are building infrastructure for human choice.</p>
+    <p>The future will not be defined by who controls the largest database. It will be defined by who <strong>returns control to the people</strong>. We build for those who believe privacy is normal, that autonomy is non‑negotiable, and that technology should expand freedom — not quietly erode it.</p>
+    <div class="rest">This is not disruption.<br>This is restoration.</div>
+    <div class="sig">POSADA · ADA · LOVELACE</div>
+    <div class="lnk"><a href="https://posada.io/lovelace/manifesto" target="_blank" rel="noopener">posada.io/lovelace/manifesto</a></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <img src="assets/posada-lovelace-logo-alpha.png" alt="Posada — Ada Lovelace">
+      <div class="meta">
+        <b>Posada Voltaire</b> — Sovereign Voting Protocol<br>
+        Posada DID · Midnight · Cardano · Hydra · STARK<br>
+        One person · one vote · verifiable by anyone
+      </div>
+    </div>
+    <div class="disc">
+      Design brief and UI concept. Candidate names, tallies, hashes, and codes shown are illustrative. Posada Voltaire is a coercion‑resistant, end‑to‑end‑verifiable voting protocol designed as a parallel and benchmark to stake‑weighted on‑chain governance. Full architecture, threat model, and honest open problems are documented in <span class="mono">SPEC.md</span>.
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ambient data-stream echoing the logo's hair-into-binary motif
+  (function(){
+    var c=document.getElementById('stream'); if(!c) return;
+    var m=window.matchMedia('(prefers-reduced-motion:reduce)'); if(m.matches){return;}
+    var x=c.getContext('2d'),W,H,DPR=Math.min(2,window.devicePixelRatio||1),lines=[];
+    function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+    function size(){W=c.width=c.clientWidth*DPR;H=c.height=c.clientHeight*DPR;build();}
+    function build(){lines=[];var n=Math.round(W/DPR/34);for(var i=0;i<n;i++){lines.push({y:Math.random()*H,sp:(.3+Math.random()*1.1)*DPR,ph:Math.random()*6.28,len:60+Math.random()*120});}}
+    var off=0;
+    function draw(){
+      x.clearRect(0,0,W,H);
+      var gilt=css('--gilt-bright')||'#C6A15B';
+      x.font=(10*DPR)+'px ui-monospace,Menlo,monospace';
+      for(var i=0;i<lines.length;i++){var L=lines[i];
+        var cx=(off*L.sp+i*90)%(W+240)-120;
+        var yy=L.y+Math.sin(off*0.01+L.ph)*10*DPR;
+        for(var j=0;j<8;j++){
+          var px=cx+j*13*DPR; if(px<-20||px>W+20)continue;
+          var a=0.06+0.05*Math.sin(off*0.03+i+j);
+          x.globalAlpha=Math.max(0,a);x.fillStyle=gilt;
+          x.fillText(((i+j+off/40|0)%2)?'1':'0',px,yy);
+        }
+      }
+      x.globalAlpha=1;off++;requestAnimationFrame(draw);
+    }
+    size();window.addEventListener('resize',size);draw();
+  })();
+</script>
