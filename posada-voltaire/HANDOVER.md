@@ -1,4 +1,4 @@
-# Posada Voltaire — Session Handoff
+# Posada Voltaire — Session Handover
 
 Context capture for continuing this work on another machine (e.g. a local
 Claude Code session). Read this + `SPEC.md` + `harness/FINDINGS.md` and you have
