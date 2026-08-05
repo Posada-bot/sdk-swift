@@ -59,6 +59,17 @@ let package = Package(
         .package(url: "https://github.com/beatt83/didcomm-swift.git", from: "0.1.14"),
         .package(url: "https://github.com/beatt83/jose-swift.git", from: "6.0.0"),
         .package(url: "https://github.com/beatt83/peerdid-swift.git", from: "3.0.1"),
+        // Pin explicitly (POS-337, 2026-08-05): peerdid-swift declares
+        // swift-bases with an extremely loose `.upToNextMajor(from: "0.0.1")`
+        // (accepts ANY 0.x.x) and nothing in this graph has a Package.resolved,
+        // so builds silently re-resolve to whatever's newest. swift-bases
+        // 0.3.0 (released 2026-08-04, hours after our last known-good iOS
+        // build) redefined its Data base64URL decoding from a failable
+        // initializer to a throwing one — didcore-swift (an indirect dep via
+        // peerdid-swift, unchanged since Oct 2024) still calls the old
+        // failable form and fails to compile against 0.3.0. Pinning here
+        // forces the whole graph back to the known-good 0.2.x line.
+        .package(url: "https://github.com/swift-libp2p/swift-bases.git", .upToNextMinor(from: "0.2.1")),
         .package(url: "https://github.com/input-output-hk/anoncreds-rs.git", exact: "0.4.1"),
         .package(url: "https://github.com/hyperledger/identus-apollo.git", exact: "1.8.0"),
         .package(url: "https://github.com/KittyMac/Sextant.git", exact: "0.4.31"),
