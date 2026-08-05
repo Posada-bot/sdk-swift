@@ -120,7 +120,14 @@ let package = Package(
                 "Domain",
                 "Core",
                 .product(name: "PeerDID", package: "peerdid-swift"),
-                .product(name: "SwiftProtobuf", package: "swift-protobuf")
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+                // POS-337: a declared-but-unconsumed .package() entry alone
+                // did not influence resolution (confirmed — the build still
+                // resolved swift-bases to the breaking 0.3.0). Consuming the
+                // product directly, the same way peerdid-swift itself does,
+                // makes this target's own dependency edge subject to the
+                // tighter top-level constraint declared above.
+                .product(name: "Base64", package: "swift-bases")
             ],
             path: "EdgeAgentSDK/Castor/Sources"
         ),
